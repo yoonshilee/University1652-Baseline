@@ -58,7 +58,7 @@ parser.add_argument('--DA', action='store_true', help='use Color Data Augmentati
 parser.add_argument('--resume', action='store_true', help='use resume trainning' )
 parser.add_argument('--share', action='store_true', help='share weight between different view' )
 parser.add_argument('--extra_Google', action='store_true', help='using extra noise Google' )
-parser.add_argument('--fp16', action='store_true', help='use float16 instead of float32, which will save about 50% memory' )
+parser.add_argument('--fp16', action='store_true', help='use float16 instead of float32, which will save about 50 percent memory' )
 opt = parser.parse_args()
 
 if opt.resume:
@@ -384,5 +384,6 @@ else:
 
 model = train_model(model, model_test, criterion, optimizer_ft, exp_lr_scheduler,
                        num_epochs=num_epochs)
+
 
 

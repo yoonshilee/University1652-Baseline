@@ -61,8 +61,8 @@ parser.add_argument('--use_NAS', action='store_true', help='use NAS')
 parser.add_argument('--warm_epoch', default=0, type=int, help='the first K epoch that needs warm up')
 parser.add_argument('--lr', default=0.01, type=float, help='learning rate')
 parser.add_argument('--moving_avg', default=1.0, type=float, help='moving average')
-parser.add_argument('--fp16', action='store_true',help='use float16 instead of float32, which will save about 50% memory')
-parser.add_argument('--bf16', action='store_true',help='use bfloat16 instead of float32, which will save about 50% memory')
+parser.add_argument('--fp16', action='store_true',help='use float16 instead of float32, which will save about 50 percent memory')
+parser.add_argument('--bf16', action='store_true',help='use bfloat16 instead of float32, which will save about 50 percent memory')
 # extra losses (default is cross-entropy loss. You can fuse different losses for further performance boost.)
 parser.add_argument('--arcface', action='store_true', help='use ArcFace loss')
 parser.add_argument('--circle', action='store_true', help='use Circle loss')
@@ -536,5 +536,6 @@ else:
 
 model = train_model(model, model_test, criterion, optimizer_ft, exp_lr_scheduler,
                     scaler, num_epochs=num_epochs)
+
 
 
