@@ -1,0 +1,27 @@
+[project]
+name = "university1652-baseline"
+version = "0.1.0"
+description = "University-1652 ground-to-satellite baseline workspace managed with uv."
+readme = "README.md"
+authors = [
+    { name = "Yoonshi", email = "1817452550@qq.com" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "matplotlib",
+    "numpy",
+    "pillow",
+    "pyyaml",
+    "pytorch-metric-learning",
+    "scipy",
+    "torch",
+    "torchvision",
+]
+
+[project.scripts]
+cross-view-g2s = "university1652_baseline.cli:main"
+university1652-baseline = "university1652_baseline.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.9.9,<0.10.0"]
+build-backend = "uv_build"
