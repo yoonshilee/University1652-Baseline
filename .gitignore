@@ -34,3 +34,5 @@ core
 *.npy
 *.pt
 *.pth
+
+data/raw/

@@ -42,6 +42,8 @@
   - `uv run python scripts/test.py --help`
   - `uv run cross-view-g2s layout`
   - `uv run cross-view-g2s validate-submission --answer answer.txt --archive answer.zip`
+- Check cuda version before installing torch if you have to use torch in this project
+- Use `uv add <package-name>` while adding lib package. Use `uv pip install --upgrade --index-url https://download.pytorch.org/whl/cu<version> torch corchvision torchaudio` while installing torch dependencies. `<>` means you have to replace the term inside.
 
 ## Agents
 

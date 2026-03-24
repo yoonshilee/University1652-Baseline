@@ -14,8 +14,6 @@ dependencies = [
     "pyyaml",
     "pytorch-metric-learning",
     "scipy",
-    "torch",
-    "torchvision",
 ]
 
 [project.scripts]

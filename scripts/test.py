@@ -3,22 +3,11 @@
 from __future__ import print_function, division
 
 import argparse
-import torch
-import torch.nn as nn
-import torch.optim as optim
-from torch.optim import lr_scheduler
-from torch.autograd import Variable
-import torch.backends.cudnn as cudnn
-import numpy as np
-import torchvision
-from torchvision import datasets, models, transforms
-import time
 import os
+import math
+import time
 import scipy.io
 import yaml
-import math
-from university1652_baseline.model import ft_net, two_view_net, three_view_net
-from university1652_baseline.utils import load_network
 
 ######################################################################
 # Options
@@ -40,8 +29,22 @@ parser.add_argument('--multi', action='store_true', help='use multiple query' )
 parser.add_argument('--fp16', action='store_true', help='use fp16.' )
 parser.add_argument('--bf16', action='store_true', help='use bf16.' )
 parser.add_argument('--ms',default='1', type=str,help='multiple_scale: e.g. 1 1,1.1  1,1.1,1.2')
+parser.add_argument('--query_name', default='query_street', type=str, help='query split name')
+parser.add_argument('--gallery_name', default='gallery_satellite', type=str, help='gallery split name')
+parser.add_argument('--run_eval', action='store_true', help='run legacy evaluate_gpu.py after feature extraction')
 
 opt = parser.parse_args()
+
+import torch
+import torch.nn as nn
+from torch.autograd import Variable
+import torch.backends.cudnn as cudnn
+import numpy as np
+import torchvision
+from torchvision import datasets, models, transforms
+from university1652_baseline.model import ft_net, two_view_net, three_view_net
+from university1652_baseline.utils import load_network
+
 os.makedirs('outputs', exist_ok=True)
 ###load config###
 # load the training config
@@ -211,15 +214,13 @@ if use_gpu:
 # Extract feature
 since = time.time()
 
-#gallery_name = 'gallery_street' 
-query_name = 'query_satellite' 
+query_name = opt.query_name
+gallery_name = opt.gallery_name
 
-#gallery_name = 'gallery_satellite'
-#query_name = 'query_street'
-
-#gallery_name = 'gallery_street'
-#query_name = 'query_drone'
-gallery_name = 'gallery_drone'
+if gallery_name not in image_datasets:
+    raise ValueError(f'Unknown gallery split: {gallery_name}. Available: {list(image_datasets.keys())}')
+if query_name not in image_datasets:
+    raise ValueError(f'Unknown query split: {query_name}. Available: {list(image_datasets.keys())}')
 
 which_gallery = which_view(gallery_name)
 which_query = which_view(query_name)
@@ -273,7 +274,9 @@ if __name__ == "__main__":
 
     print(opt.name)
     result = './model/%s/result.txt'%opt.name
-    os.system('python evaluate_gpu.py | tee -a %s'%result)
+    if opt.run_eval:
+        result_abs = os.path.abspath(result)
+        os.system('cd outputs && python ../scripts/evaluate_gpu.py | tee -a %s'%result_abs)
 
 
 

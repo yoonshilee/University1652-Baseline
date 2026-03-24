@@ -3,34 +3,13 @@
 from __future__ import print_function, division
 
 import argparse
-
-import numpy as np
-import torch
-import torch.nn as nn
-import torch.optim as optim
-from torch.optim import lr_scheduler
-from torch.autograd import Variable
-from torchvision import datasets, transforms
-from university1652_baseline.folder import ImageFolder
-import torch.backends.cudnn as cudnn
-import matplotlib
-
-matplotlib.use('agg')
-import matplotlib.pyplot as plt
-# from PIL import Image
-import copy
-import time
 import os
-from university1652_baseline.model import two_view_net, three_view_net
-from university1652_baseline.random_erasing import RandomErasing
-from university1652_baseline.autoaugment import ImageNetPolicy, CIFAR10Policy
+import time
+import copy
+
 import yaml
 from shutil import copyfile
-from university1652_baseline.utils import update_average, get_model_list, load_network, save_network, make_weights_for_balanced_classes
-from pytorch_metric_learning import losses, miners  # pip install pytorch-metric-learning
-from university1652_baseline.circle_loss import CircleLoss, convert_label_to_similarity
 
-version = torch.__version__
 ######################################################################
 # Options
 # --------
@@ -61,6 +40,8 @@ parser.add_argument('--use_NAS', action='store_true', help='use NAS')
 parser.add_argument('--warm_epoch', default=0, type=int, help='the first K epoch that needs warm up')
 parser.add_argument('--lr', default=0.01, type=float, help='learning rate')
 parser.add_argument('--moving_avg', default=1.0, type=float, help='moving average')
+parser.add_argument('--num_epochs', default=120, type=int, help='number of training epochs')
+parser.add_argument('--max_batches', default=0, type=int, help='max batches per epoch for quick debugging, 0 means no limit')
 parser.add_argument('--fp16', action='store_true',help='use float16 instead of float32, which will save about 50 percent memory')
 parser.add_argument('--bf16', action='store_true',help='use bfloat16 instead of float32, which will save about 50 percent memory')
 # extra losses (default is cross-entropy loss. You can fuse different losses for further performance boost.)
@@ -73,6 +54,28 @@ parser.add_argument('--lifted', action='store_true', help='use lifted loss')
 parser.add_argument('--sphere', action='store_true', help='use sphere loss')
 parser.add_argument('--loss_merge', action='store_true', help='combine perspectives to calculate losses')
 opt = parser.parse_args()
+
+import numpy as np
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torch.optim import lr_scheduler
+from torch.autograd import Variable
+from torchvision import datasets, transforms
+from university1652_baseline.folder import ImageFolder
+import torch.backends.cudnn as cudnn
+import matplotlib
+
+matplotlib.use('agg')
+import matplotlib.pyplot as plt
+from university1652_baseline.model import two_view_net, three_view_net
+from university1652_baseline.random_erasing import RandomErasing
+from university1652_baseline.autoaugment import ImageNetPolicy, CIFAR10Policy
+from university1652_baseline.utils import update_average, get_model_list, load_network, save_network, make_weights_for_balanced_classes
+from pytorch_metric_learning import losses, miners  # pip install pytorch-metric-learning
+from university1652_baseline.circle_loss import CircleLoss, convert_label_to_similarity
+
+version = torch.__version__
 
 if opt.resume:
     model, opt, start_epoch = load_network(opt.name, opt)
@@ -232,6 +235,7 @@ def train_model(model, model_test, criterion, optimizer, scheduler, scaler, num_
             running_corrects = 0.0
             running_corrects2 = 0.0
             running_corrects3 = 0.0
+            processed_batches = 0
             # Iterate over data.
             for data, data2, data3, data4 in zip(dataloaders['satellite'], dataloaders['street'], dataloaders['drone'],
                                                  dataloaders['google']):
@@ -411,6 +415,10 @@ def train_model(model, model_test, criterion, optimizer, scheduler, scaler, num_
                 running_corrects2 += float(torch.sum(preds2 == labels2.data))
                 if opt.views == 3:
                     running_corrects3 += float(torch.sum(preds3 == labels3.data))
+                processed_batches += 1
+                if opt.max_batches > 0 and processed_batches >= opt.max_batches:
+                    print(f'Reached max_batches={opt.max_batches}, early stop this epoch.')
+                    break
 
             epoch_loss = running_loss / dataset_sizes['satellite']
             epoch_acc = running_corrects / dataset_sizes['satellite']
@@ -445,6 +453,7 @@ def train_model(model, model_test, criterion, optimizer, scheduler, scaler, num_
     time_elapsed = time.time() - since
     print('Training complete in {:.0f}m {:.0f}s'.format(
         time_elapsed // 60, time_elapsed % 60))
+    save_network(model, opt.name, 'last')
     # print('Best val Acc: {:4f}'.format(best_acc))
     # save_network(model_test, opt.name+'adapt', epoch)
 
@@ -516,8 +525,8 @@ if not opt.resume:
     if not os.path.isdir(dir_name):
         os.mkdir(dir_name)
     # record every run
-    copyfile('train.py', dir_name + '/train.py')
-    copyfile('./model.py', dir_name + '/model.py')
+    copyfile('scripts/train.py', dir_name + '/train.py')
+    copyfile('src/university1652_baseline/model.py', dir_name + '/model.py')
     # save opts
     with open('%s/opts.yaml' % dir_name, 'w') as fp:
         yaml.dump(vars(opt), fp, default_flow_style=False)
@@ -529,10 +538,10 @@ scaler = torch.cuda.amp.GradScaler()
 criterion = nn.CrossEntropyLoss()
 if opt.moving_avg < 1.0:
     model_test = copy.deepcopy(model)
-    num_epochs = 140
+    num_epochs = max(opt.num_epochs, 1)
 else:
     model_test = None
-    num_epochs = 120
+    num_epochs = max(opt.num_epochs, 1)
 
 model = train_model(model, model_test, criterion, optimizer_ft, exp_lr_scheduler,
                     scaler, num_epochs=num_epochs)
