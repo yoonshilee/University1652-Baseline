@@ -14,11 +14,24 @@ dependencies = [
     "pyyaml",
     "pytorch-metric-learning",
     "scipy",
+    "torch",
+    "torchaudio",
+    "torchvision",
 ]
 
 [project.scripts]
 cross-view-g2s = "university1652_baseline.cli:main"
 university1652-baseline = "university1652_baseline.cli:main"
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu128" }
+torchvision = { index = "pytorch-cu128" }
+torchaudio = { index = "pytorch-cu128" }
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
 
 [build-system]
 requires = ["uv_build>=0.9.9,<0.10.0"]
