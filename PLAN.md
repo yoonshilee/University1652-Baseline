@@ -37,6 +37,30 @@
 - `docs/requirement/requirement.md` 中的 `2759 lines` 属于文档笔误，后续全部以 `2579` 为准。
 - `docs/requirement/answer.txt` 示例使用空白分隔的 `10` 个 satellite identifier；实现上允许空格或 Tab，但最终语义必须是 `10` 个 token。
 
+## 数据路径约定
+
+- 训练集与测试集统一放在 `data/raw/University-Release/` 下。
+- 数据集体积过大，不随仓库提交；仓库内仅用 `.gitkeep` 或空目录约定保留路径语义。
+- 推荐目录布局如下：
+
+```text
+data/
+  raw/
+    University-Release/
+      train/
+        satellite/
+        street/
+        drone/
+        google/
+      test/
+        query_street/
+        gallery_satellite/
+```
+
+- `train/` 用于模型训练，`test/` 用于 challenge 推理。
+- `test/query_street/` 应为官方 masked challenge query 集；不得用本地非 masked 旧测试集替代最终提交。
+- `docs/requirement/query_street_name.txt` 是最终 query 顺序唯一来源，不能自行按文件系统顺序遍历替代。
+
 ## 已完成事项
 
 - [x] 建立 `uv` 项目骨架。
@@ -88,6 +112,154 @@ uv run python scripts/train.py --help
 uv run python scripts/test.py --help
 uv run cross-view-g2s validate-submission --answer answer.txt --archive answer.zip
 ```
+
+## 在另一台机器上的完整执行流程
+
+### 1. 配置环境
+
+先检查 GPU 与 CUDA 版本，再安装与之匹配的 PyTorch 轮子：
+
+```bash
+nvidia-smi
+uv sync
+```
+
+- 必须先看 `nvidia-smi` 输出中的 CUDA Version，再决定 PyTorch 安装源。
+- 如果 `uv sync` 后 `torch` / `torchvision` 不匹配当前机器 CUDA，请按仓库约定重新安装：
+
+```bash
+uv pip install --upgrade --index-url https://download.pytorch.org/whl/cu<version> torch torchvision torchaudio
+```
+
+- 其中 `<version>` 需要替换为与该机器匹配的 CUDA 版本号，例如 `cu128`。
+- 安装完成后建议立即验证：
+
+```bash
+uv run python scripts/train.py --help
+uv run python scripts/test.py --help
+uv run cross-view-g2s layout
+```
+
+### 2. 检查 challenge 数据目录
+
+先确认另一台机器上的官方 challenge 测试集已经按约定放入 `data/raw/University-Release/test/`：
+
+```bash
+uv run python scripts/check_challenge_data.py \
+  --query-order docs/requirement/query_street_name.txt \
+  --query-root data/raw/University-Release/test/query_street \
+  --gallery-root data/raw/University-Release/test/gallery_satellite \
+  --manifest-dir data/manifest \
+  --strict
+```
+
+- 期望结果：
+  - `query_count = 2579`
+  - `gallery_count = 951`
+  - `missing_query_count = 0`
+  - `duplicate_query_name_count = 0`
+  - `duplicate_gallery_id_count = 0`
+- 如不满足，先修正数据布局，再继续训练或测试。
+
+### 3. 训练命令
+
+推荐从完整训练集开始训练 partial street-view -> satellite 检索模型：
+
+```bash
+uv run python scripts/train.py \
+  --name street_sat_baseline \
+  --data_dir data/raw/University-Release/train \
+  --views 3 \
+  --share \
+  --h 256 \
+  --w 256 \
+  --batchsize 8 \
+  --num_epochs 120
+```
+
+- 训练输出默认写入 `model/street_sat_baseline/`。
+- 关键产物包括：
+  - `model/street_sat_baseline/net_*.pth`
+  - `model/street_sat_baseline/net_last.pth`
+  - `model/street_sat_baseline/opts.yaml`
+  - `model/street_sat_baseline/train.jpg`
+
+### 4. 如何记录训练结果
+
+每次准备作为候选提交的训练运行，至少记录以下信息到 `docs/report_notes.md` 或等价实验记录中：
+
+- 机器信息：GPU 型号、`nvidia-smi` 显示的 CUDA 版本。
+- 数据根目录：`data/raw/University-Release/train`。
+- 完整训练命令。
+- checkpoint 目录名，例如 `street_sat_baseline`。
+- 最终使用的 checkpoint 文件名，例如 `net_last.pth` 或某个最佳 epoch。
+- 训练轮数、输入分辨率、batch size、是否 `--share`、`--views` 配置。
+- 如果做过多次训练，记录每次的差异点与最终选择理由。
+- 若后续在 CodaLab 得到成绩，再把 leaderboard 指标追加到同一份记录。
+
+建议直接按下面模板追加：
+
+```text
+Date:
+Machine:
+CUDA (nvidia-smi):
+Train data root: data/raw/University-Release/train
+Train command:
+Checkpoint dir:
+Chosen checkpoint:
+Notes / metric / leaderboard:
+```
+
+### 5. 测试命令
+
+训练完成后，在官方 challenge 测试集上抽取 query/gallery 特征：
+
+```bash
+uv run python scripts/test.py \
+  --name street_sat_baseline \
+  --test_dir data/raw/University-Release/test \
+  --query_name query_street \
+  --gallery_name gallery_satellite \
+  --batchsize 256
+```
+
+- 该命令默认会生成：
+  - `outputs/pytorch_result.mat`
+  - `outputs/query_name.txt`
+  - `outputs/gallery_name.txt`
+- `--name` 必须对应 `model/<name>/` 下存在的已训练 checkpoint。
+
+### 6. 导出提交文件
+
+在特征抽取完成后，导出 challenge 合规的 `answer.txt` 与 `answer.zip`：
+
+```bash
+uv run python scripts/export_challenge_submission.py \
+  --mat outputs/pytorch_result.mat \
+  --query-order docs/requirement/query_street_name.txt \
+  --query-paths outputs/query_name.txt \
+  --gallery-paths outputs/gallery_name.txt \
+  --answer outputs/answer.txt \
+  --archive outputs/answer.zip \
+  --topk 10
+```
+
+- 导出脚本会强制按 `docs/requirement/query_street_name.txt` 顺序写结果。
+- 输出 token 只允许 satellite identifier，不带图片后缀。
+
+### 7. 最终校验命令
+
+导出后再次单独运行校验，确保上传前无格式错误：
+
+```bash
+uv run cross-view-g2s validate-submission \
+  --answer outputs/answer.txt \
+  --archive outputs/answer.zip \
+  --query-order docs/requirement/query_street_name.txt
+```
+
+- 通过后再上传 `outputs/answer.zip`。
+- Moodle 简短报告应同时记录所用方法、训练命令、checkpoint 与最终结果。
 
 ## 风险与注意点
 
