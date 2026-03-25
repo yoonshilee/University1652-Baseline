@@ -61,47 +61,35 @@ data/
 - `test/query_street/` 应为官方 masked challenge query 集；不得用本地非 masked 旧测试集替代最终提交。
 - `docs/requirement/query_street_name.txt` 是最终 query 顺序唯一来源，不能自行按文件系统顺序遍历替代。
 
-## 已完成事项
-
-- [x] 建立 `uv` 项目骨架。
-- [x] 将核心模块迁入 `src/university1652_baseline/`。
-- [x] 将入口脚本迁入 `scripts/`。
-- [x] 将历史参考文件整理到 `docs/reference/`。
-- [x] 将 `GPU-Re-Ranking/` 整理到 `third_party/gpu_re_ranking/`。
-- [x] 更新 `AGENTS.md` 反映真实目录与 challenge 规则。
-- [x] 重写 `PLAN.md`，去除旧乱码内容。
-- [x] 增加提交校验命令 `uv run cross-view-g2s validate-submission`。
-- [x] 把部分脚本默认输出迁到 `outputs/`，避免继续污染仓库根目录。
-
 ## 下一阶段任务
 
 ### P0：环境与命令收口
 
-- [x] 运行 `uv sync`，锁定可用依赖。
-- [x] 验证 `uv run python scripts/train.py --help` 可以正常启动。
-- [x] 验证 `uv run python scripts/test.py --help` 可以正常启动。
-- [x] 验证 `uv run cross-view-g2s layout` 与 `validate-submission` 可正常运行。
+- [ ] 运行 `uv sync`，锁定可用依赖。
+- [ ] 验证 `uv run python scripts/train.py --help` 可以正常启动。
+- [ ] 验证 `uv run python scripts/test.py --help` 可以正常启动。
+- [ ] 验证 `uv run cross-view-g2s layout` 与 `validate-submission` 可正常运行。
 
 ### P1：数据接口统一
 
-- [x] 明确 challenge 数据在 `data/` 下的最终目录布局。
-- [x] 生成 query manifest，直接绑定 `docs/requirement/query_street_name.txt` 顺序。
-- [x] 统一 gallery identifier 与图像文件路径映射。
-- [x] 增加缺失文件、重复 id、空目录检查。
+- [ ] 明确 challenge 数据在 `data/` 下的最终目录布局。
+- [ ] 生成 query manifest，直接绑定 `docs/requirement/query_street_name.txt` 顺序。
+- [ ] 统一 gallery identifier 与图像文件路径映射。
+- [ ] 增加缺失文件、重复 id、空目录检查。
 
 ### P2：训练与推理收敛到 challenge 场景
 
-- [x] 审核 `scripts/train.py` 与 `scripts/test.py` 当前默认视角是否真正对齐 ground-to-satellite challenge。
-- [x] 为 partial street-view -> satellite 设定单独的推荐训练/测试命令。
-- [x] 确定最终 submission 使用的 checkpoint、epoch、指标。（当前仓库 `model/` 无 checkpoint，已在执行记录中标注阻塞）
-- [x] 评估是否引入 `third_party/gpu_re_ranking/` 作为可选后处理。
+- [ ] 审核 `scripts/train.py` 与 `scripts/test.py` 当前默认视角是否真正对齐 ground-to-satellite challenge。
+- [ ] 为 partial street-view -> satellite 设定单独的推荐训练/测试命令。
+- [ ] 确定最终 submission 使用的 checkpoint、epoch、指标。（当前仓库 `model/` 无 checkpoint，已在执行记录中标注阻塞）
+- [ ] 评估是否引入 `third_party/gpu_re_ranking/` 作为可选后处理。
 
 ### P3：提交流水线闭环
 
-- [x] 实现或整理导出 `answer.txt` 的最终脚本。
-- [x] 用 `docs/requirement/query_street_name.txt` 验证顺序一致性。
-- [x] 自动打包 `answer.zip`。
-- [x] 记录 leaderboard 结果、方法摘要与 Moodle 报告要点。
+- [ ] 实现或整理导出 `answer.txt` 的最终脚本。
+- [ ] 用 `docs/requirement/query_street_name.txt` 验证顺序一致性。
+- [ ] 自动打包 `answer.zip`。
+- [ ] 记录 leaderboard 结果、方法摘要与 Moodle 报告要点。
 
 ## 推荐命令
 
