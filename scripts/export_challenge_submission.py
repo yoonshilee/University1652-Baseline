@@ -87,6 +87,11 @@ def main() -> int:
     if len(gallery_paths) != len(gallery_f):
         raise ValueError(f"gallery paths count ({len(gallery_paths)}) != gallery_f rows ({len(gallery_f)}).")
 
+    if args.topk <= 0:
+        raise ValueError(f"--topk must be positive, got {args.topk}.")
+    if args.topk > len(gallery_paths):
+        raise ValueError(f"--topk ({args.topk}) cannot exceed gallery size ({len(gallery_paths)}).")
+
     query_name_to_index: dict[str, int] = {}
     for i, path in enumerate(query_paths):
         name = _name_from_path(path)

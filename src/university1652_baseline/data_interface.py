@@ -10,7 +10,9 @@ IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".bmp", ".tif", ".tiff", ".webp"}
 @dataclass
 class DataCheckReport:
     query_count: int
+    query_image_count: int
     gallery_count: int
+    gallery_image_count: int
     missing_query_count: int
     duplicate_query_name_count: int
     duplicate_gallery_id_count: int

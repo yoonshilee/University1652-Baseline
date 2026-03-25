@@ -117,9 +117,20 @@ if opt.multi:
     dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=opt.batchsize,
                                              shuffle=False, num_workers=16) for x in ['gallery','query','multi-query']}
 else:
-    image_datasets = {x: datasets.ImageFolder( os.path.join(data_dir,x) ,data_transforms) for x in ['gallery_satellite','gallery_drone', 'gallery_street', 'query_satellite', 'query_drone', 'query_street']}
-    dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=opt.batchsize,
-                                             shuffle=False, num_workers=16) for x in ['gallery_satellite', 'gallery_drone','gallery_street', 'query_satellite', 'query_drone', 'query_street']}
+    required_splits = sorted(set([opt.gallery_name, opt.query_name]))
+    image_datasets = {}
+    dataloaders = {}
+    for split in required_splits:
+        split_dir = os.path.join(data_dir, split)
+        if not os.path.isdir(split_dir):
+            raise FileNotFoundError(f'Missing split directory: {split_dir}')
+        image_datasets[split] = datasets.ImageFolder(split_dir, data_transforms)
+        dataloaders[split] = torch.utils.data.DataLoader(
+            image_datasets[split],
+            batch_size=opt.batchsize,
+            shuffle=False,
+            num_workers=16,
+        )
 use_gpu = torch.cuda.is_available()
 
 ######################################################################
@@ -227,13 +238,13 @@ which_query = which_view(query_name)
 print('%d -> %d:'%(which_query, which_gallery))
 
 gallery_path = image_datasets[gallery_name].imgs
-f = open('outputs/gallery_name.txt','w')
-for p in gallery_path:
-    f.write(p[0]+'\n')
+with open('outputs/gallery_name.txt','w') as f:
+    for p in gallery_path:
+        f.write(p[0]+'\n')
 query_path = image_datasets[query_name].imgs
-f = open('outputs/query_name.txt','w')
-for p in query_path:
-    f.write(p[0]+'\n')
+with open('outputs/query_name.txt','w') as f:
+    for p in query_path:
+        f.write(p[0]+'\n')
 
 gallery_label, gallery_path  = get_id(gallery_path)
 query_label, query_path  = get_id(query_path)

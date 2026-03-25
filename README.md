@@ -170,6 +170,51 @@ Now we have supported:
 - Pytorch 0.3+ 
 
 ## Getting started
+
+## Quickstart (uv + challenge submission)
+
+This workspace is reorganized as a Python package managed by `uv` (Python 3.11). The challenge submission workflow is:
+
+```bash
+uv sync
+uv run cross-view-g2s layout
+
+# 1) Verify masked challenge test data layout + names
+uv run python scripts/check_challenge_data.py \
+  --query-order docs/requirement/query_street_name.txt \
+  --query-root data/raw/University-Release/test/query_street \
+  --gallery-root data/raw/University-Release/test/gallery_satellite \
+  --manifest-dir data/manifest \
+  --strict
+
+# 2) Extract features (query_street -> gallery_satellite)
+uv run python scripts/test.py \
+  --name <your_model_dir_name> \
+  --test_dir data/raw/University-Release/test \
+  --query_name query_street \
+  --gallery_name gallery_satellite
+
+# 3) Export submission files
+uv run python scripts/export_challenge_submission.py \
+  --mat outputs/pytorch_result.mat \
+  --query-order docs/requirement/query_street_name.txt \
+  --query-paths outputs/query_name.txt \
+  --gallery-paths outputs/gallery_name.txt \
+  --answer outputs/answer.txt \
+  --archive outputs/answer.zip \
+  --topk 10
+
+# 4) Final validation
+uv run cross-view-g2s validate-submission \
+  --answer outputs/answer.txt \
+  --archive outputs/answer.zip \
+  --query-order docs/requirement/query_street_name.txt
+```
+
+Notes:
+
+- The canonical query order file is `docs/requirement/query_street_name.txt` (2579 lines). Do not traverse queries by filesystem order.
+- If `check_challenge_data.py` reports all queries missing while the local query count is 2579, you are likely using a non-masked/incorrect query set.
 ### Installation
 - Install Pytorch from http://pytorch.org/
 - Install required packages

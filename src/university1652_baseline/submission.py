@@ -16,6 +16,8 @@ def _read_nonempty_lines(path: Path) -> list[str]:
 def validate_submission(answer_path: Path, query_order_path: Path, archive_path: Path | None = None) -> None:
     if not answer_path.is_file():
         raise FileNotFoundError(f"Missing answer file: {answer_path}")
+    if answer_path.name != "answer.txt":
+        raise ValueError(f"Answer file must be named answer.txt, got {answer_path.name}.")
     if not query_order_path.is_file():
         raise FileNotFoundError(f"Missing query order file: {query_order_path}")
 
