@@ -36,6 +36,7 @@
 - `docs/requirement/query_street_name.txt` 实测为 `2579` 行，这是唯一可信 query 数。
 - `docs/requirement/requirement.md` 中的 `2759 lines` 属于文档笔误，后续全部以 `2579` 为准。
 - `docs/requirement/answer.txt` 示例使用空白分隔的 `10` 个 satellite identifier；实现上允许空格或 Tab，但最终语义必须是 `10` 个 token。
+- 在线提交平台以 <https://www.codabench.org/competitions/15251/> 为准；本地仓库负责格式与流程收口，但上传前仍需核对实时 phase、deadline、metric 与 submission limit。
 
 ## 数据路径约定
 
@@ -103,6 +104,7 @@ data/
 - [ ] 实现或整理导出 `answer.txt` 的最终脚本。
 - [ ] 用 `docs/requirement/query_street_name.txt` 验证顺序一致性。
 - [ ] 自动打包 `answer.zip`。
+- [ ] 上传前复核 CodaBench 当前 phase、评测指标与提交次数限制。
 - [ ] 记录 leaderboard 结果、方法摘要与 Moodle 报告要点。
 
 ## 推荐命令

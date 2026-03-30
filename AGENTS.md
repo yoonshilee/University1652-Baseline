@@ -2,7 +2,7 @@
 
 ## Scope
 
-本仓库只服务一个明确目标：基于 University-1652 及 ACM MM UAVM 2025 challenge 材料，完成 partial street-view 到 satellite 的检索、导出合规 `answer.txt`、打包 `answer.zip`，并整理可复现实验记录与课程报告素材。
+本仓库只服务一个明确目标：基于 University-1652 与当前 UAVM challenge 材料，完成 partial street-view 到 satellite 的检索、导出合规 `answer.txt`、打包 `answer.zip`，并整理可复现实验记录与课程报告素材。
 
 ## Canonical Facts
 
@@ -16,6 +16,7 @@
 - 提交文件名必须是 `answer.txt`，压缩包名必须是 `answer.zip`。
 - `docs/requirement/answer.txt` 示例只包含 identifier，不带图片后缀。
 - `docs/requirement/requirement.md` 中曾写到 `2759 lines`，但与真实 `query_street_name.txt` 行数不一致；仓库内统一以 `2579` 为唯一有效值。
+- 当前在线提交平台以 `https://www.codabench.org/competitions/15251/` 为准；如平台 phase、deadline、指标或提交次数限制发生变化，以上传页面实时说明为最终依据。
 - 课程还要求在 UM Moodle 提交简短报告或方法说明。
 
 ## Current Layout
@@ -103,6 +104,7 @@ data/
 - token 不带 `.jpg/.jpeg/.png` 等图片后缀。
 - query 顺序与 `docs/requirement/query_street_name.txt` 一致。
 - `answer.zip` 名称正确，且根目录包含 `answer.txt`。
+- 上传前重新核对 CodaBench 页面上的 phase、deadline、metric 与 submission limit，避免格式正确但平台规则不符。
 
 当前落地点：
 
