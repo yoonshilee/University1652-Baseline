@@ -45,6 +45,46 @@
 - Check cuda version before installing torch if you have to use torch in this project
 - Use `uv add <package-name>` while adding lib package. Use `uv pip install --upgrade --index-url https://download.pytorch.org/whl/cu<version> torch corchvision torchaudio` while installing torch dependencies. `<>` means you have to replace the term inside.
 
+## Dataset Layout Contract
+
+当前仓库对“最终落地后的本地数据目录”采用扁平约定，而不是继续假设压缩包中的 `University-Release/` 目录长期存在。
+
+- 默认训练根目录：`data/train/`
+- 默认 challenge 测试根目录：`data/test/`
+- 可选 tour 训练目录：`data/train_tour/`
+- 可选 tour 测试目录：`data/test_tour/`
+
+推荐把你给出的数据处理命令的产物整理到以下结构：
+
+```text
+data/
+  train/
+    satellite/
+    street/
+    drone/
+    google/
+  train_tour/
+    ...
+  test/
+    query_street/
+    gallery_satellite/
+    query_drone/
+    gallery_drone/
+    query_satellite/
+    gallery_street/
+    ...
+  test_tour/
+    ...
+```
+
+额外约束：
+
+- `scripts/train.py` 默认应把 `data/train/` 视为训练入口。
+- `scripts/test.py` 默认应把 `data/test/` 视为 challenge 推理入口。
+- `scripts/check_challenge_data.py` 默认应检查 `data/test/query_street/` 与 `data/test/gallery_satellite/`。
+- 只有在用户明确说明仍保留原始解压目录时，才再使用 `University-Release/train` 或 `University-Release/test` 这类旧路径。
+- `train_tour/` 与 `test_tour/` 不是提交校验的 canonical 路径；只有显式实验需要时才消费。
+
 ## Agents
 
 ### 1. Rule And Submission Agent
@@ -76,6 +116,7 @@
 - 约定 `data/` 下训练集、测试集、challenge query/gallery 的布局。
 - 保留 `query_street_name.txt` 的原始顺序。
 - 维护 gallery identifier 与图像文件之间的映射规则。
+- 优先识别扁平数据路径：`data/train/`、`data/test/`、`data/train_tour/`、`data/test_tour/`。
 
 建议产物：
 

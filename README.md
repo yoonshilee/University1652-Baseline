@@ -182,15 +182,15 @@ uv run cross-view-g2s layout
 # 1) Verify masked challenge test data layout + names
 uv run python scripts/check_challenge_data.py \
   --query-order docs/requirement/query_street_name.txt \
-  --query-root data/raw/University-Release/test/query_street \
-  --gallery-root data/raw/University-Release/test/gallery_satellite \
+  --query-root data/test/query_street \
+  --gallery-root data/test/gallery_satellite \
   --manifest-dir data/manifest \
   --strict
 
 # 2) Extract features (query_street -> gallery_satellite)
 uv run python scripts/test.py \
   --name <your_model_dir_name> \
-  --test_dir data/raw/University-Release/test \
+  --test_dir data/test \
   --query_name query_street \
   --gallery_name gallery_satellite
 
@@ -215,6 +215,7 @@ Notes:
 
 - The canonical query order file is `docs/requirement/query_street_name.txt` (2579 lines). Do not traverse queries by filesystem order.
 - If `check_challenge_data.py` reports all queries missing while the local query count is 2579, you are likely using a non-masked/incorrect query set.
+- This repo assumes the final local dataset roots are `data/train`, `data/test`, `data/train_tour`, and `data/test_tour`. Do not keep workflow examples pinned to `University-Release/...` unless you intentionally preserve that temporary extraction layout.
 ### Installation
 - Install Pytorch from http://pytorch.org/
 - Install required packages

@@ -18,8 +18,8 @@ from university1652_baseline.data_interface import (
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Check challenge data layout and generate manifests.")
     parser.add_argument("--query-order", default="docs/requirement/query_street_name.txt", help="Canonical query order file.")
-    parser.add_argument("--query-root", default="data/raw/University-Release/test/query_street", help="Directory containing challenge query images.")
-    parser.add_argument("--gallery-root", default="data/raw/University-Release/test/gallery_satellite", help="Directory containing challenge gallery images.")
+    parser.add_argument("--query-root", default="data/test/query_street", help="Directory containing challenge query images.")
+    parser.add_argument("--gallery-root", default="data/test/gallery_satellite", help="Directory containing challenge gallery images.")
     parser.add_argument("--manifest-dir", default="data/manifest", help="Output directory for generated manifests.")
     parser.add_argument("--strict", action="store_true", help="Return non-zero exit code if any issue is found.")
     return parser.parse_args()
@@ -124,3 +124,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

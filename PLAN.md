@@ -39,27 +39,41 @@
 
 ## 数据路径约定
 
-- 训练集与测试集统一放在 `data/raw/University-Release/` 下。
+- 训练集与测试集统一放在 `data/` 下的扁平目录中，不再默认依赖 `University-Release/` 中间层。
 - 数据集体积过大，不随仓库提交；仓库内仅用 `.gitkeep` 或空目录约定保留路径语义。
 - 推荐目录布局如下：
 
 ```text
 data/
-  raw/
-    University-Release/
-      train/
-        satellite/
-        street/
-        drone/
-        google/
-      test/
-        query_street/
-        gallery_satellite/
+  train/
+    satellite/
+    street/
+    drone/
+    google/
+  train_tour/
+    ...
+  test/
+    query_street/
+    gallery_satellite/
+    query_drone/
+    gallery_drone/
+    query_satellite/
+    gallery_street/
+    ...
+  test_tour/
+    ...
 ```
 
 - `train/` 用于模型训练，`test/` 用于 challenge 推理。
+- `train_tour/` 与 `test_tour/` 作为额外数据保留，不是 challenge 提交流程的默认入口。
 - `test/query_street/` 应为官方 masked challenge query 集；不得用本地非 masked 旧测试集替代最终提交。
 - `docs/requirement/query_street_name.txt` 是最终 query 顺序唯一来源，不能自行按文件系统顺序遍历替代。
+- 如果数据最初来自如下处理流程：
+  - 解压 `University-Release.zip`
+  - 生成 `train_tour/`
+  - 下载并解压 `train.tar`、`test.tar`、`test_tour.tar`
+  - 删除 `University-Release/`
+  则最终应把有效路径理解为 `data/train/`、`data/test/`、`data/train_tour/`、`data/test_tour/`。
 
 ## 下一阶段任务
 
@@ -130,13 +144,13 @@ uv run cross-view-g2s layout
 
 ### 2. 检查 challenge 数据目录
 
-先确认另一台机器上的官方 challenge 测试集已经按约定放入 `data/raw/University-Release/test/`：
+先确认另一台机器上的官方 challenge 测试集已经按约定放入 `data/test/`：
 
 ```bash
 uv run python scripts/check_challenge_data.py \
   --query-order docs/requirement/query_street_name.txt \
-  --query-root data/raw/University-Release/test/query_street \
-  --gallery-root data/raw/University-Release/test/gallery_satellite \
+  --query-root data/test/query_street \
+  --gallery-root data/test/gallery_satellite \
   --manifest-dir data/manifest \
   --strict
 ```
@@ -156,7 +170,7 @@ uv run python scripts/check_challenge_data.py \
 ```bash
 uv run python scripts/train.py \
   --name street_sat_baseline \
-  --data_dir data/raw/University-Release/train \
+  --data_dir data/train \
   --views 3 \
   --share \
   --h 256 \
@@ -177,7 +191,7 @@ uv run python scripts/train.py \
 每次准备作为候选提交的训练运行，至少记录以下信息到 `docs/report_notes.md` 或等价实验记录中：
 
 - 机器信息：GPU 型号、`nvidia-smi` 显示的 CUDA 版本。
-- 数据根目录：`data/raw/University-Release/train`。
+- 数据根目录：`data/train`。
 - 完整训练命令。
 - checkpoint 目录名，例如 `street_sat_baseline`。
 - 最终使用的 checkpoint 文件名，例如 `net_last.pth` 或某个最佳 epoch。
@@ -191,7 +205,7 @@ uv run python scripts/train.py \
 Date:
 Machine:
 CUDA (nvidia-smi):
-Train data root: data/raw/University-Release/train
+Train data root: data/train
 Train command:
 Checkpoint dir:
 Chosen checkpoint:
@@ -205,7 +219,7 @@ Notes / metric / leaderboard:
 ```bash
 uv run python scripts/test.py \
   --name street_sat_baseline \
-  --test_dir data/raw/University-Release/test \
+  --test_dir data/test \
   --query_name query_street \
   --gallery_name gallery_satellite \
   --batchsize 256

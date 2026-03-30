@@ -44,7 +44,7 @@ To Be Decided.
      ptHYAN3piG3YwOft I9bzP8jnLlz9zpMi c3vVTLCzTAVzuapU gkriPL4PNtcWoHgg iIL2ASdQ5vrFsJs0 TinwNxUGYAzz0kTO XilyyHqywhUBxHfT WLasj720MnF13zPI Qz4NypYGPhHdiAvn gO2hUfIHC8N4ZWKz
      ```
 
-3. 结果顺序要求：必须严格按照查询名称列表的顺序返回结果，查询名称列表链接：<https://github.com/spyflying/ACMMM2025Workshop-UAV/blob/main/query_street_name.txt，最终结果文件需包含2759行。>
+3. 结果顺序要求：必须严格按照查询名称列表的顺序返回结果，查询名称列表链接：<https://github.com/spyflying/ACMMM2025Workshop-UAV/blob/main/query_street_name.txt>，最终结果文件需包含2759行。
 
 ### 技术支持
 
