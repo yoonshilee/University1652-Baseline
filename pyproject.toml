@@ -17,6 +17,7 @@ dependencies = [
     "torch",
     "torchaudio",
     "torchvision",
+    "huggingface-hub>=1.8.0",
 ]
 
 [project.scripts]

@@ -35,4 +35,4 @@ core
 *.pt
 *.pth
 
-data/raw/
+.gitattributes
